@@ -5,8 +5,8 @@
  * Author: Brian Stanback <stanback@gmail.com>
  * License: New BSD License
  * Website: http://www.stanback.net/code/godaddy-dyndns.html
- * Version: 0.0.5
- * Last Updated: 4/16/2012
+ * Version: 0.0.6
+ * Last Updated: 6/19/2012
  * Requires: PHP 5.3+, cURL
  *
  * This class can be integrated into your application or it can be
@@ -77,7 +77,7 @@ class GoDaddyDNS
         // Apply default configuration settings
         $this->_config = array_merge(array(
             'cookie_file'                 => tempnam(sys_get_temp_dir(), 'Curl'),
-            'auto_remove_cookie_file'     => false,
+            'auto_remove_cookie_file'     => true,
             'auto_logout'                 => false,
             'godaddy_dns_default_url'     => 'https://dns.godaddy.com/default.aspx',
             'godaddy_dns_zonefile_url'    => 'https://dns.godaddy.com/ZoneFile.aspx?zoneType=0&sa=&zone=',
@@ -190,7 +190,7 @@ class GoDaddyDNS
         if (!$this->isLoggedIn($username)) {
             // User is not already logged in, build and submit a login request
             $postUrl = curl_getinfo($this->_curlHandle, CURLINFO_EFFECTIVE_URL);
-            
+
             $post = array(
                 'Login$userEntryPanel2$LoginImageButton.x' => 0,
                 'Login$userEntryPanel2$LoginImageButton.y' => 0,
@@ -213,11 +213,9 @@ class GoDaddyDNS
     /**
      * Check to see if the expected user is logged in.
      */
-     
-//     
     public function isLoggedIn($username) {
-        if (preg_match('#Welcome:&nbsp;<span id="ctl00_lblUser" .*?>(.*)</span>#', $this->_lastResponse, $match)) {
-            if (strtolower($match[1]) == strtolower($username) || $match[2] == $username) {
+        if (preg_match('#Welcome:&nbsp;<span id="ctl00_lblUser" .*?\>(.*)</span>#', $this->_lastResponse, $match)) {
+            if (substr(strtolower($match[1]),0,7) == substr(strtolower($username),0,7) || $match[2] == $username) {
                 return true;
             } else {
                 // An unexpected user was logged in
